@@ -1,0 +1,19 @@
+        modified:   Makefile
+        modified:   data/heuristics.txt
+        modified:   src/heuristics/heuristic_factory.cpp
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+        MQLibDispatcher_QPU.py
+        MQLibDispatcher_QPU_backup.py
+        data/curgraph/
+        data/results.csv
+        data/zips/
+        experiments/
+        include/heuristics/qubo/dwave_bridge.h
+        include/heuristics/qubo/dwave_qpu.h
+        include/heuristics/qubo/dwave_sa.h
+        python/
+        src/heuristics/qubo/dwave_bridge.cpp
+        src/heuristics/qubo/dwave_qpu.cpp
+        src/heuristics/qubo/dwave_sa.cpp

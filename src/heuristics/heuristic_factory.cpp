@@ -27,6 +27,11 @@
 #include "heuristics/qubo/palubeckis2006.h"
 #include "heuristics/qubo/pardalos2008.h"
 
+#ifdef USE_DWAVE
+#include "heuristics/qubo/dwave_qpu.h"
+#include "heuristics/qubo/dwave_sa.h"
+#endif
+
 // Get a pointer to a heuristic of a templated type
 template<typename T> MaxCutHeuristic* NewMaxCutHeur(const MaxCutInstance& mi,
                                                     double runtime_limit,
@@ -137,6 +142,13 @@ HeuristicFactory::HeuristicFactory() {
     QUBOCreator(&NewQUBOHeur<Lodi1999>, "Genetic algorithm");
   qubo_map_["GLOVER1998a"] =
     QUBOCreator(&NewQUBOHeur<Glover1998a>, "Tabu search");
+    
+  #ifdef USE_DWAVE
+    qubo_map_["DWAVEQPU"] =
+        QUBOCreator(&NewQUBOHeur<DWaveQPU>, "D-Wave QPU via Ocean");
+    qubo_map_["DWAVESA"]  =
+        QUBOCreator(&NewQUBOHeur<DWaveSA>, "D-Wave simulated annealing (Ocean)");
+  #endif
 }
 
 MaxCutHeuristic* HeuristicFactory::RunMaxCutHeuristic(const std::string& code,

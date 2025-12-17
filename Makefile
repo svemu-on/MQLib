@@ -2,6 +2,43 @@ CXX ?= g++
 CXXFLAGS = -Iinclude -std=c++0x -O2 -Wall
 LFLAGS = -lm
 SHAREFLAGS = -shared -fPIC
+
+# --- D-Wave / Python embedding configuration --------------------------
+#
+# To enable D-Wave integration, build with:
+#   make USE_DWAVE=1
+#
+# By default, we assume you created a uv/venv at .venv via:
+#   uv venv .venv
+#   uv pip install "dwave-ocean-sdk" pybind11
+#
+# You can override PYTHON from the command line if needed:
+#   make USE_DWAVE=1 PYTHON=/path/to/python
+#
+PYTHON ?= .venv/bin/python
+
+ifeq ($(USE_DWAVE),1)
+
+# Ask pybind11 where to find Python + pybind11 headers.
+PYTHON_INCLUDES := $(shell $(PYTHON) -m pybind11 --includes 2>/dev/null)
+
+# Ask Python where the libpython and its directory are.
+PYTHON_LIBDIR := $(shell $(PYTHON) -c "import sysconfig; print(sysconfig.get_config_var('LIBDIR') or '')" 2>/dev/null)
+PYTHON_LIBNAME := $(shell $(PYTHON) -c "import sysconfig, os; lib=sysconfig.get_config_var('LDLIBRARY') or ''; print(os.path.splitext(lib)[0][3:] if lib else '')" 2>/dev/null)
+
+# Append flags instead of overwriting.
+CXXFLAGS += -DUSE_DWAVE $(PYTHON_INCLUDES)
+
+ifneq ($(PYTHON_LIBDIR),)
+LFLAGS += -L$(PYTHON_LIBDIR)
+endif
+ifneq ($(PYTHON_LIBNAME),)
+LFLAGS += -l$(PYTHON_LIBNAME)
+endif
+
+endif
+# ----------------------------------------------------------------------
+
 BUILDDIR = .build
 SRCDIR = src
 EXECUTABLE = bin/MQLib
@@ -13,7 +50,7 @@ DEPS = $(shell echo "$(OBJS)" | sed -e "s/\.o/.P/g")
 all: $(EXECUTABLE) $(STATIC)
 
 $(EXECUTABLE): $(OBJS)
-	$(CXX) $(LFLAGS) -o $(EXECUTABLE) $(OBJS)
+	$(CXX) -o $(EXECUTABLE) $(OBJS) $(LFLAGS)
 
 $(STATIC): $(OBJS)
 	@type ar >/dev/null 2>&1 || { echo >&2 "ar required for building static library but it's not installed.  Aborting."; exit 1; }
